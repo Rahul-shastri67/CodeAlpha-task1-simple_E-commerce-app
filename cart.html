@@ -1,0 +1,54 @@
+<!-- public/cart.html -->
+<!DOCTYPE html>
+<html>
+<head><title>Your Cart</title></head>
+<body>
+  <h1>Your Cart</h1>
+  <ul id="cart-list"></ul>
+  <button id="checkoutBtn">Checkout</button>
+
+  <script>
+    // Load cart items from server
+    function loadCart() {
+      fetch('/api/cart')
+        .then(res => res.json())
+        .then(cart => {
+          const list = document.getElementById('cart-list');
+          list.innerHTML = '';
+          if (!cart || cart.length === 0) {
+            list.innerHTML = '<li>(empty)</li>';
+            return;
+          }
+          cart.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `Product ID: ${item.productId} - Qty: ${item.quantity} `;
+            // Add a "Remove" button
+            const btn = document.createElement('button');
+            btn.textContent = 'Remove';
+            btn.onclick = () => {
+              fetch('/api/cart/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: item.productId })
+              }).then(loadCart);
+            };
+            li.appendChild(btn);
+            list.appendChild(li);
+          });
+        });
+    }
+    loadCart();
+
+    // Checkout
+    document.getElementById('checkoutBtn').onclick = () => {
+      fetch('/api/orders', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) alert('Order placed! ID: ' + data.orderId);
+          else alert('Error: ' + (data.error || ''));
+          loadCart();
+        });
+    };
+  </script>
+</body>
+</html>

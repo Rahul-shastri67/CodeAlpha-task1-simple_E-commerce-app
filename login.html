@@ -1,0 +1,66 @@
+<!-- public/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* (same CSS you already wrote, no changes needed here) */
+    /* just removed <br> dependency and improved spacing */
+  </style>
+</head>
+<body>
+  <h1 style="text-align:center;margin-bottom:10px;">Yash Enterprises</h1>
+  <h2 style="text-align:center;margin-bottom:0px;">Login</h2>
+
+  <!-- Alert placeholder -->
+  <div id="message">
+All your needs at one store, this is your own store 
+  </div>
+
+  <form id="loginForm">
+    <label for="username">Username</label>
+    <input id="username" name="username" type="text" required>
+
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" required>
+
+    <button type="submit">Login</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const msgBox = document.getElementById('message');
+
+    form.onsubmit = async function (e) {
+      e.preventDefault();
+
+      const username = form.username.value.trim();
+      const password = form.password.value;
+
+      // clear previous message
+      msgBox.innerHTML = "";
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          msgBox.innerHTML = `<div class="alert success">✅ Logged in successfully!</div>`;
+          setTimeout(() => { window.location = 'index.html'; }, 800);
+        } else {
+          msgBox.innerHTML = `<div class="alert error">❌ ${data.error || 'Login failed'}</div>`;
+        }
+      } catch (err) {
+        msgBox.innerHTML = `<div class="alert error">⚠️ Server error. Try again later.</div>`;
+      }
+    };
+  </script>
+</body>
+</html>
